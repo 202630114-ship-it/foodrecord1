@@ -3,624 +3,892 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Foodrecord - 식재료 유통기한 관리 & AI 레시피</title>
-    <!-- Tailwind CSS CDN -->
+    <title>FOODRECORD - 스마트 식재료 & 유통기한 관리</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap');
-        
-        * {
-            font-family: 'Pretendard', sans-serif;
+        * { font-family: 'Pretendard', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
-
-        /* 다크 테마 날짜 입력창 스타일 보정 */
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(1);
-            cursor: pointer;
-            opacity: 0.8;
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.8; }
         }
-        input[type="date"]::-webkit-calendar-picker-indicator:hover {
-            opacity: 1;
-        }
-
-        /* 테마 색상 변수 정의 */
-        :root {
-            --theme-color: #10b981;
-            --theme-hover: #059669;
-            --theme-light: rgba(16, 185, 129, 0.15);
-            --theme-border: rgba(16, 185, 129, 0.3);
-        }
-
-        .theme-bg { background-color: var(--theme-color) !important; }
-        .theme-bg-hover:hover { background-color: var(--theme-hover) !important; }
-        .theme-text { color: var(--theme-color) !important; }
-        .theme-border { border-color: var(--theme-border) !important; }
-        .theme-light-bg { background-color: var(--theme-light) !important; }
-
-        /* 커스텀 스크롤바 */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #111827;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #374151;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #4b5563;
+        .logo-pulse {
+            animation: pulse-ring 2s infinite ease-in-out;
         }
     </style>
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white">
+<body class="bg-slate-50 text-slate-800 text-base leading-normal antialiased">
 
-    <!-- 1. Header Navigation -->
-    <header class="sticky top-0 z-50 backdrop-blur-md bg-gray-950/80 border-b border-gray-800">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            
+    <!-- Header Navbar -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
             <!-- Logo -->
-            <div class="flex items-center gap-3 cursor-pointer">
-                <!-- SVG 로고 (음식 + 재생 + 캘린더 모티브) -->
-                <div class="w-10 h-10 rounded-xl theme-light-bg flex items-center justify-center border theme-border">
-                    <svg class="w-6 h-6 theme-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2a8 8 0 0 0-8 8v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a8 8 0 0 0-8-8z"></path>
-                        <polygon points="10 9 15 12 10 15 10 9" fill="currentColor"></polygon>
-                        <rect x="14" y="14" width="4" height="4" rx="1"></rect>
-                    </svg>
+            <div class="flex items-center gap-2.5 cursor-pointer" onclick="showPage('home')">
+                <div class="w-9 h-9 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-black text-lg shadow-sm shadow-emerald-200">
+                    FR
                 </div>
-                <span class="font-bold text-xl tracking-tight text-white">FOOD<span class="theme-text">RECORD</span></span>
+                <div>
+                    <span class="text-xl font-extrabold text-slate-900 tracking-tight">FOOD<span class="text-emerald-600">RECORD</span></span>
+                    <span class="block text-[10px] font-semibold text-slate-400 tracking-wider">SMART FOOD MANAGER</span>
+                </div>
             </div>
 
-            <!-- Controls (Language & Theme Buttons) -->
+            <!-- Header Actions -->
             <div class="flex items-center gap-3">
-                <!-- Language Selector -->
-                <div class="relative">
-                    <button id="langBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-900 border border-gray-800 hover:border-gray-700 text-sm font-medium transition-all text-gray-300">
-                        <i data-lucide="globe" class="w-4 h-4 theme-text"></i>
-                        <span id="currentLangText">🌐 Language</span>
-                        <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-gray-500"></i>
+                <!-- Multi-language Switcher -->
+                <div class="relative inline-block text-left">
+                    <button id="langSelectBtn" onclick="toggleLangDropdown()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-emerald-500 bg-white text-slate-700 font-medium text-sm transition-all shadow-sm">
+                        <i class="fa-solid fa-globe text-emerald-600 text-sm"></i>
+                        <span id="currentLangLabel">🇰🇷 한국어</span>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 ms-1"></i>
                     </button>
-                    <div id="langDropdown" class="hidden absolute right-0 mt-2 w-40 bg-gray-900 border border-gray-800 rounded-xl shadow-2xl py-2 z-50">
-                        <button onclick="changeLanguage('ko')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-800 flex items-center gap-2">🇰🇷 한국어</button>
-                        <button onclick="changeLanguage('en')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-800 flex items-center gap-2">🇺🇸 English</button>
-                        <button onclick="changeLanguage('ja')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-800 flex items-center gap-2">🇯🇵 日本語</button>
-                        <button onclick="changeLanguage('zh')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-800 flex items-center gap-2">🇨🇳 中文 (简体)</button>
-                        <button onclick="changeLanguage('es')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-800 flex items-center gap-2">🇪🇸 Español</button>
-                        <button onclick="changeLanguage('fr')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-800 flex items-center gap-2">🇫🇷 Français</button>
-                        <button onclick="changeLanguage('de')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-800 flex items-center gap-2">🇩🇪 Deutsch</button>
-                        <button onclick="changeLanguage('vi')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-800 flex items-center gap-2">🇻🇳 Tiếng Việt</button>
-                        <button onclick="changeLanguage('ru')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-800 flex items-center gap-2">🇷🇺 Русский</button>
-                        <button onclick="changeLanguage('pt')" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-800 flex items-center gap-2">🇵🇹 Português</button>
+                    <!-- Language Dropdown Menu -->
+                    <div id="langDropdown" class="hidden absolute right-0 mt-2 w-44 rounded-xl bg-white shadow-xl border border-slate-100 z-50 overflow-hidden py-1">
+                        <button onclick="changeLanguage('ko', '🇰🇷 한국어')" class="w-full text-left px-4 py-2 text-sm font-medium hover:bg-emerald-50 hover:text-emerald-700 flex items-center gap-2">🇰🇷 한국어</button>
+                        <button onclick="changeLanguage('en', '🇺🇸 English')" class="w-full text-left px-4 py-2 text-sm font-medium hover:bg-emerald-50 hover:text-emerald-700 flex items-center gap-2">🇺🇸 English</button>
+                        <button onclick="changeLanguage('ja', '🇯🇵 日本語')" class="w-full text-left px-4 py-2 text-sm font-medium hover:bg-emerald-50 hover:text-emerald-700 flex items-center gap-2">🇯🇵 日本語</button>
+                        <button onclick="changeLanguage('zh', '🇨🇳 簡體中文')" class="w-full text-left px-4 py-2 text-sm font-medium hover:bg-emerald-50 hover:text-emerald-700 flex items-center gap-2">🇨🇳 簡體中文</button>
+                        <button onclick="changeLanguage('es', '🇪🇸 Español')" class="w-full text-left px-4 py-2 text-sm font-medium hover:bg-emerald-50 hover:text-emerald-700 flex items-center gap-2">🇪🇸 Español</button>
+                        <button onclick="changeLanguage('fr', '🇫🇷 Français')" class="w-full text-left px-4 py-2 text-sm font-medium hover:bg-emerald-50 hover:text-emerald-700 flex items-center gap-2">🇫🇷 Français</button>
+                        <button onclick="changeLanguage('de', '🇩🇪 Deutsch')" class="w-full text-left px-4 py-2 text-sm font-medium hover:bg-emerald-50 hover:text-emerald-700 flex items-center gap-2">🇩🇪 Deutsch</button>
+                        <button onclick="changeLanguage('vi', '🇻🇳 Tiếng Việt')" class="w-full text-left px-4 py-2 text-sm font-medium hover:bg-emerald-50 hover:text-emerald-700 flex items-center gap-2">🇻🇳 Tiếng Việt</button>
+                        <button onclick="changeLanguage('th', '🇹🇭 ภาษาไทย')" class="w-full text-left px-4 py-2 text-sm font-medium hover:bg-emerald-50 hover:text-emerald-700 flex items-center gap-2">🇹🇭 ภาษาไทย</button>
+                        <button onclick="changeLanguage('id', '🇮🇩 Bahasa')" class="w-full text-left px-4 py-2 text-sm font-medium hover:bg-emerald-50 hover:text-emerald-700 flex items-center gap-2">🇮🇩 Bahasa Indonesia</button>
                     </div>
                 </div>
 
-                <!-- Theme Selector -->
-                <div class="relative">
-                    <button id="themeBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-900 border border-gray-800 hover:border-gray-700 text-sm font-medium transition-all text-gray-300">
-                        <i data-lucide="palette" class="w-4 h-4 theme-text"></i>
-                        <span>🎨 Theme</span>
-                    </button>
-                    <div id="themeDropdown" class="hidden absolute right-0 mt-2 w-44 bg-gray-900 border border-gray-800 rounded-xl shadow-2xl p-2 z-50">
-                        <button onclick="setTheme('emerald')" class="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-gray-800 flex items-center gap-2.5">
-                            <span class="w-3.5 h-3.5 rounded-full bg-emerald-500"></span> Emerald
-                        </button>
-                        <button onclick="setTheme('blue')" class="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-gray-800 flex items-center gap-2.5">
-                            <span class="w-3.5 h-3.5 rounded-full bg-blue-500"></span> Ocean Blue
-                        </button>
-                        <button onclick="setTheme('orange')" class="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-gray-800 flex items-center gap-2.5">
-                            <span class="w-3.5 h-3.5 rounded-full bg-orange-500"></span> Sunset Orange
-                        </button>
-                        <button onclick="setTheme('purple')" class="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-gray-800 flex items-center gap-2.5">
-                            <span class="w-3.5 h-3.5 rounded-full bg-purple-500"></span> Purple Glow
-                        </button>
-                        <button onclick="setTheme('pink')" class="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-gray-800 flex items-center gap-2.5">
-                            <span class="w-3.5 h-3.5 rounded-full bg-pink-500"></span> Rose Pink
-                        </button>
-                    </div>
-                </div>
+                <button onclick="triggerInteractiveDemo()" class="hidden md:flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm px-4 py-2 rounded-lg transition-all shadow-sm">
+                    <span data-i18n="startNow">지금 바로 시작하기</span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
-        
+    <!-- Loading Overlay with Percentage & FoodRecord Logo -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-50 flex flex-col items-center justify-center text-white hidden">
+        <div class="text-center px-6 max-w-sm">
+            <!-- Logo Animation -->
+            <div class="relative w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                <div class="absolute inset-0 bg-emerald-500 rounded-2xl blur-lg opacity-50 logo-pulse"></div>
+                <div class="relative w-20 h-20 bg-emerald-500 rounded-2xl flex items-center justify-center text-white font-black text-3xl shadow-xl">
+                    FR
+                </div>
+            </div>
+
+            <h2 class="text-2xl font-bold tracking-tight mb-1">FOOD<span class="text-emerald-400">RECORD</span></h2>
+            <p id="loadingStatusText" class="text-slate-300 text-sm font-medium mb-6">스마트 냉장고 시스템을 준비 중입니다...</p>
+
+            <!-- Percentage Counter -->
+            <div id="loadingPercent" class="text-4xl font-extrabold text-emerald-400 mb-4 font-mono">0%</div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-700 shadow-inner">
+                <div id="loadingBar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full w-0 transition-all duration-100"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN PAGE CONTENT (Home Landing) -->
+    <main id="homePage" class="transition-all duration-300">
         <!-- Hero Section -->
-        <section class="text-center space-y-4 max-w-2xl mx-auto pt-6">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold theme-light-bg theme-text border theme-border">
-                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-                <span id="badgeText">식자재 유통기한 스마트 기록 관리</span>
-            </span>
-            <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white" id="heroTitle">
-                식재료 관리부터 AI 레시피 연동까지
-            </h1>
-            <p class="text-gray-400 text-sm sm:text-base leading-relaxed" id="heroSubtitle">
-                유통기한 입력 한 번으로 알림부터 레시피 추천까지 간편하게 받아보세요.
-            </p>
-        </section>
+        <section class="relative pt-12 pb-20 overflow-hidden bg-gradient-to-b from-emerald-50/50 via-slate-50 to-white">
+            <div class="max-w-6xl mx-auto px-6 text-center">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-semibold text-xs mb-5 border border-emerald-200">
+                    <i class="fa-solid fa-sparkles text-emerald-600"></i>
+                    <span data-i18n="heroBadge">스마트한 식재료 유통기한 관리</span>
+                </span>
 
-        <!-- STEP 1 ~ 3 Process Section -->
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Step 1 -->
-            <div class="bg-gray-900 border border-gray-800/80 rounded-2xl p-6 relative overflow-hidden hover:border-gray-700 transition-all">
-                <div class="w-10 h-10 rounded-xl theme-light-bg flex items-center justify-center mb-4">
-                    <i data-lucide="calendar-plus" class="w-5 h-5 theme-text"></i>
-                </div>
-                <div class="text-xs font-semibold theme-text uppercase tracking-wider mb-1">STEP 1</div>
-                <h3 class="text-lg font-bold text-white mb-2" id="step1Title">유통기한 입력</h3>
-                <p class="text-gray-400 text-sm" id="step1Desc">구매한 식재료와 유통기한을 간편하게 기록합니다.</p>
-            </div>
+                <h1 class="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight mb-6">
+                    버려지는 식재료 없이<br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600" data-i18n="heroTitle">완벽한 냉장고 라이프</span>
+                </h1>
 
-            <!-- Step 2 -->
-            <div class="bg-gray-900 border border-gray-800/80 rounded-2xl p-6 relative overflow-hidden hover:border-gray-700 transition-all">
-                <div class="w-10 h-10 rounded-xl theme-light-bg flex items-center justify-center mb-4">
-                    <i data-lucide="bell" class="w-5 h-5 theme-text"></i>
-                </div>
-                <div class="text-xs font-semibold theme-text uppercase tracking-wider mb-1">STEP 2</div>
-                <h3 class="text-lg font-bold text-white mb-2" id="step2Title">임박 알림 받기</h3>
-                <p class="text-gray-400 text-sm" id="step2Desc">유통기한이 다가오면 놓치지 않게 미리 알려줍니다.</p>
-            </div>
+                <p class="text-base md:text-lg text-slate-600 max-w-2xl mx-auto mb-8 font-normal leading-relaxed" data-i18n="heroDesc">
+                    식재료 등록부터 유통기한 D-day 알림, 남은 재료 AI 맞춤 레시피까지!<br class="hidden sm:inline">
+                    푸드레코드와 함께 더 건강하고 스마트하게 식생활을 관리해보세요.
+                </p>
 
-            <!-- Step 3 -->
-            <div class="bg-gray-900 border border-gray-800/80 rounded-2xl p-6 relative overflow-hidden hover:border-gray-700 transition-all">
-                <div class="w-10 h-10 rounded-xl theme-light-bg flex items-center justify-center mb-4">
-                    <i data-lucide="chef-hat" class="w-5 h-5 theme-text"></i>
-                </div>
-                <div class="text-xs font-semibold theme-text uppercase tracking-wider mb-1">STEP 3</div>
-                <h3 class="text-lg font-bold text-white mb-2" id="step3Title">AI 레시피 추천</h3>
-                <p class="text-gray-400 text-sm" id="step3Desc">보관 중인 식재료로 만들 수 있는 요리를 추천받습니다.</p>
-            </div>
-        </section>
-
-        <!-- Interactive Simulator Section -->
-        <section class="bg-gray-900/60 border border-gray-800 rounded-3xl p-6 sm:p-8 space-y-6">
-            <div class="flex items-center justify-between border-b border-gray-800 pb-4">
-                <div>
-                    <h2 class="text-xl font-bold text-white flex items-center gap-2" id="simTitle">
-                        <i data-lucide="play-circle" class="w-5 h-5 theme-text"></i>
-                        체험해보기: 식재료 바로 등록
-                    </h2>
-                    <p class="text-xs text-gray-400 mt-1" id="simSub">직접 식재료와 유통기한을 선택해서 추가해 보세요.</p>
-                </div>
-            </div>
-
-            <!-- Form -->
-            <form id="addFoodForm" onsubmit="handleAddFood(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-3">
-                <div class="sm:col-span-5">
-                    <input type="text" id="foodName" placeholder="식재료명 (예: 우유, 두부)" required
-                        class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 transition-all placeholder-gray-500">
-                </div>
-                <div class="sm:col-span-5">
-                    <input type="date" id="expiryDate" required
-                        class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 transition-all">
-                </div>
-                <div class="sm:col-span-2">
-                    <button type="submit" id="addBtn"
-                        class="w-full h-full theme-bg theme-bg-hover text-white font-semibold py-3 px-4 rounded-xl text-sm flex items-center justify-center gap-1.5 transition-all shadow-lg">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
-                        <span id="addBtnText">등록</span>
+                <!-- Action Button Triggering Loading Screen -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14">
+                    <button onclick="triggerInteractiveDemo()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base px-7 py-3.5 rounded-xl shadow-md shadow-emerald-200 hover:scale-102 transition-all flex items-center justify-center gap-2 group">
+                        <i class="fa-solid fa-rocket text-yellow-300 text-lg group-hover:rotate-12 transition-transform"></i>
+                        <span data-i18n="startNow">지금 바로 시작하기</span>
+                    </button>
+                    <button onclick="scrollToFeatures()" class="w-full sm:w-auto bg-white border border-slate-300 hover:border-slate-400 text-slate-700 font-semibold text-base px-6 py-3.5 rounded-xl transition-all">
+                        <span data-i18n="learnMore">기능 알아보기</span>
                     </button>
                 </div>
-            </form>
 
-            <!-- Food List -->
-            <div class="space-y-3 pt-2">
-                <h4 class="text-xs font-semibold text-gray-400 uppercase tracking-wider" id="listHeader">보관 중인 식재료 목록</h4>
-                <div id="foodList" class="space-y-3">
-                    <!-- Dynamic Items render here -->
+                <!-- Feature Quick Cards -->
+                <div id="features" class="grid md:grid-cols-3 gap-6 text-left mt-8">
+                    <div class="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-sm hover:shadow-md transition-all">
+                        <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600 text-xl mb-4">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 mb-2" data-i18n="feature1Title">자동 D-Day 알림</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed" data-i18n="feature1Desc">유통기한 임박 식재료를 스마트하게 감지하여 정기적으로 알림을 전달합니다.</p>
+                    </div>
+
+                    <div class="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-sm hover:shadow-md transition-all">
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 text-xl mb-4">
+                            <i class="fa-solid fa-utensils"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 mb-2" data-i18n="feature2Title">AI 추천 레시피</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed" data-i18n="feature2Desc">냉장고 속 남은 재료를 조합하여 쉽고 맛있는 요리법을 즉시 제안해 드립니다.</p>
+                    </div>
+
+                    <div class="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-sm hover:shadow-md transition-all">
+                        <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600 text-xl mb-4">
+                            <i class="fa-solid fa-chart-pie"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 mb-2" data-i18n="feature3Title">식비 절감 통계</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed" data-i18n="feature3Desc">버려지는 음식을 줄여 매월 지출되는 식비를 현저히 줄여줍니다.</p>
+                    </div>
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- Footer -->
-    <footer class="border-t border-gray-900 bg-gray-950 py-8 text-center text-xs text-gray-500">
-        <p>© 2026 FOODRECORD. All rights reserved.</p>
-    </footer>
+    <!-- DEMO DASHBOARD PAGE (Hidden by default, shown after loading) -->
+    <div id="demoDashboardPage" class="hidden min-h-screen bg-slate-100 py-8 px-4 sm:px-6">
+        <div class="max-w-6xl mx-auto">
+            <!-- Dashboard Header Navigation -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <div>
+                    <span class="text-emerald-600 font-bold text-xs uppercase tracking-wider">FOODRECORD DEMO</span>
+                    <h2 class="text-2xl font-bold text-slate-900" data-i18n="dashTitle">내 스마트 냉장고 보관함</h2>
+                </div>
+                <div class="flex items-center gap-2.5">
+                    <button onclick="openAddItemModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-4 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus text-sm"></i>
+                        <span data-i18n="addItemBtn">식재료 추가하기</span>
+                    </button>
+                    <button onclick="showPage('home')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm px-4 py-2.5 rounded-xl transition-all">
+                        <span data-i18n="backHome">홈으로</span>
+                    </button>
+                </div>
+            </div>
 
-    <!-- JavaScript logic -->
+            <!-- Stats Overview -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <span class="text-slate-500 font-medium text-xs block mb-1" data-i18n="statTotal">전체 식재료</span>
+                    <span id="statTotalCount" class="text-2xl font-black text-slate-900">0개</span>
+                </div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <span class="text-emerald-600 font-medium text-xs block mb-1" data-i18n="statFresh">신선 보관</span>
+                    <span id="statFreshCount" class="text-2xl font-black text-emerald-600">0개</span>
+                </div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <span class="text-amber-600 font-medium text-xs block mb-1" data-i18n="statWarning">유통기한 임박</span>
+                    <span id="statWarningCount" class="text-2xl font-black text-amber-500">0개</span>
+                </div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <span class="text-rose-600 font-medium text-xs block mb-1" data-i18n="statExpired">기한 만료</span>
+                    <span id="statExpiredCount" class="text-2xl font-black text-rose-600">0개</span>
+                </div>
+            </div>
+
+            <!-- Category Filters -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-5">
+                <button onclick="filterItems('all')" class="filter-btn active-filter px-4 py-2 rounded-xl font-semibold text-sm bg-emerald-600 text-white shadow-sm transition-all" data-category="all" data-i18n="filterAll">전체 보기</button>
+                <button onclick="filterItems('fridge')" class="filter-btn px-4 py-2 rounded-xl font-semibold text-sm bg-white text-slate-700 hover:bg-slate-200 shadow-sm transition-all" data-category="fridge" data-i18n="filterFridge">❄️ 냉장</button>
+                <button onclick="filterItems('freezer')" class="filter-btn px-4 py-2 rounded-xl font-semibold text-sm bg-white text-slate-700 hover:bg-slate-200 shadow-sm transition-all" data-category="freezer" data-i18n="filterFreezer">🧊 냉동</button>
+                <button onclick="filterItems('pantry')" class="filter-btn px-4 py-2 rounded-xl font-semibold text-sm bg-white text-slate-700 hover:bg-slate-200 shadow-sm transition-all" data-category="pantry" data-i18n="filterPantry">🏠 실온</button>
+            </div>
+
+            <!-- Food Items Grid -->
+            <div id="foodItemsGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <!-- Dynamic Items Loaded Here via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Food Modal -->
+    <div id="addModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-100">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-xl font-bold text-slate-900" data-i18n="modalTitle">신규 식재료 등록</h3>
+                <button onclick="closeAddItemModal()" class="text-slate-400 hover:text-slate-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <form id="addFoodForm" onsubmit="handleAddFood(event)" class="space-y-4">
+                <div>
+                    <label class="block font-semibold text-slate-700 text-sm mb-1.5" data-i18n="labelName">식재료 이름</label>
+                    <input type="text" id="foodName" required placeholder="예: 우유, 계란, 사과" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:outline-none font-medium text-sm">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 text-sm mb-1.5" data-i18n="labelCategory">보관 장소</label>
+                        <select id="foodCategory" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:outline-none font-medium text-sm">
+                            <option value="fridge">❄️ 냉장</option>
+                            <option value="freezer">🧊 냉동</option>
+                            <option value="pantry">🏠 실온</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 text-sm mb-1.5" data-i18n="labelExpiry">유통기한</label>
+                        <input type="date" id="foodExpiry" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-500 focus:outline-none font-medium text-sm">
+                    </div>
+                </div>
+
+                <div class="pt-3 flex gap-2">
+                    <button type="button" onclick="closeAddItemModal()" class="w-1/2 py-2.5 rounded-xl font-semibold text-sm bg-slate-100 hover:bg-slate-200 text-slate-700" data-i18n="btnCancel">취소</button>
+                    <button type="submit" class="w-1/2 py-2.5 rounded-xl font-semibold text-sm bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm" data-i18n="btnSave">저장하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- AI Chatbot Floating Window -->
+    <div id="chatWidget" class="fixed bottom-5 right-5 z-50">
+        <!-- Chat Toggle Floating Button -->
+        <button id="chatToggleBtn" onclick="toggleChatWindow()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-5 py-3 rounded-full shadow-lg flex items-center gap-2.5 transition-all transform hover:scale-105 border border-emerald-400">
+            <i class="fa-solid fa-comments text-lg"></i>
+            <span data-i18n="chatBtnLabel">AI 레시피 & 보관 챗봇</span>
+            <span class="w-2.5 h-2.5 bg-green-300 rounded-full animate-ping"></span>
+        </button>
+
+        <!-- Chat Window Box -->
+        <div id="chatBox" class="hidden absolute bottom-16 right-0 w-[90vw] sm:w-[380px] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col h-[480px] transition-all">
+            <!-- Chat Header -->
+            <div class="bg-emerald-600 text-white p-4 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center text-base">
+                        🤖
+                    </div>
+                    <div>
+                        <h4 class="font-extrabold text-base leading-tight">FOODRECORD AI</h4>
+                        <p class="text-[11px] text-emerald-100">유통기한/레시피 무엇이든 물어보세요!</p>
+                    </div>
+                </div>
+                <button onclick="toggleChatWindow()" class="text-white hover:text-emerald-200 text-xl p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Chat Messages Container -->
+            <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50 text-sm">
+                <!-- Initial AI Greeting -->
+                <div class="flex gap-2.5">
+                    <div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold flex-shrink-0">AI</div>
+                    <div class="bg-white p-3 rounded-xl rounded-tl-none border border-slate-200 text-slate-800 shadow-sm max-w-[85%] font-medium">
+                        안녕하세요! 푸드레코드 AI 도우미입니다. 🥑<br>
+                        냉장고 속 재료로 만들 레시피나 유통기한 보관법을 질문해보세요!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Suggestion Pills -->
+            <div class="px-3 py-2 bg-slate-100 border-t border-slate-200 flex gap-1.5 overflow-x-auto whitespace-nowrap text-xs">
+                <button onclick="sendQuickPrompt('계란과 양파로 만드는 쉬운 레시피 알려줘')" class="bg-white hover:bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200 font-medium transition-all">🍳 계란 레시피</button>
+                <button onclick="sendQuickPrompt('우유 유통기한 지나도 먹어도 돼?')" class="bg-white hover:bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200 font-medium transition-all">🥛 우유 유통기한</button>
+                <button onclick="sendQuickPrompt('대파 오랫동안 신선하게 보관하는 법')" class="bg-white hover:bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200 font-medium transition-all">🥬 대파 보관법</button>
+            </div>
+
+            <!-- Chat Input Form -->
+            <form onsubmit="handleChatSubmit(event)" class="p-2.5 bg-white border-t border-slate-200 flex gap-2">
+                <input type="text" id="chatInput" placeholder="질문을 입력하세요..." required class="flex-1 px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:border-emerald-500 font-medium text-sm">
+                <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-lg transition-all flex items-center justify-center">
+                    <i class="fa-solid fa-paper-plane text-sm"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
     <script>
-        // --- 1. Multilingual i18n Dictionary ---
+        // Multi-Language Dictionary
         const i18n = {
             ko: {
-                badge: "식자재 유통기한 스마트 기록 관리",
-                title: "식재료 관리부터 AI 레시피 연동까지",
-                subtitle: "유통기한 입력 한 번으로 알림부터 레시피 추천까지 간편하게 받아보세요.",
-                step1Title: "유통기한 입력",
-                step1Desc: "구매한 식재료와 유통기한을 간편하게 기록합니다.",
-                step2Title: "임박 알림 받기",
-                step2Desc: "유통기한이 다가오면 놓치지 않게 미리 알려줍니다.",
-                step3Title: "AI 레시피 추천",
-                step3Desc: "보관 중인 식재료로 만들 수 있는 요리를 추천받습니다.",
-                simTitle: "체험해보기: 식재료 바로 등록",
-                simSub: "직접 식재료와 유통기한을 선택해서 추가해 보세요.",
-                inputPlaceholder: "식재료명 (예: 우유, 두부)",
-                addBtn: "등록",
-                listHeader: "보관 중인 식재료 목록",
-                aiPrefix: "AI 추천: ",
-                aiSuffix: " 활용 추천 요리법 및 보관 팁 확인하기",
-                dDayTag: "일 남음",
-                todayTag: "오늘 만료",
-                expiredTag: "경과됨"
+                startNow: "지금 바로 시작하기",
+                learnMore: "기능 알아보기",
+                heroBadge: "스마트한 식재료 유통기한 관리",
+                heroTitle: "완벽한 냉장고 라이프",
+                heroDesc: "식재료 등록부터 유통기한 D-day 알림, 남은 재료 AI 맞춤 레시피까지! 푸드레코드와 함께 더 건강하고 스마트하게 식생활을 관리해보세요.",
+                feature1Title: "자동 D-Day 알림",
+                feature1Desc: "유통기한 임박 식재료를 스마트하게 감지하여 정기적으로 알림을 전달합니다.",
+                feature2Title: "AI 추천 레시피",
+                feature2Desc: "냉장고 속 남은 재료를 조합하여 쉽고 맛있는 요리법을 즉시 제안해 드립니다.",
+                feature3Title: "식비 절감 통계",
+                feature3Desc: "버려지는 음식을 줄여 매월 지출되는 식비를 현저히 줄여줍니다.",
+                dashTitle: "내 스마트 냉장고 보관함",
+                addItemBtn: "식재료 추가하기",
+                backHome: "홈으로",
+                statTotal: "전체 식재료",
+                statFresh: "신선 보관",
+                statWarning: "유통기한 임박",
+                statExpired: "기한 만료",
+                filterAll: "전체 보기",
+                filterFridge: "❄️ 냉장",
+                filterFreezer: "🧊 냉동",
+                filterPantry: "🏠 실온",
+                modalTitle: "신규 식재료 등록",
+                labelName: "식재료 이름",
+                labelCategory: "보관 장소",
+                labelExpiry: "유통기한",
+                btnCancel: "취소",
+                btnSave: "저장하기",
+                chatBtnLabel: "AI 레시피 & 보관 챗봇"
             },
             en: {
-                badge: "Smart Expiry Date Tracking",
-                title: "From Food Logging to AI Recipes",
-                subtitle: "Effortlessly track food expiration dates and get instant AI recipe suggestions.",
-                step1Title: "Log Expiry Date",
-                step1Desc: "Easily record your purchased ingredients and expiration dates.",
-                step2Title: "Get Expiry Alerts",
-                step2Desc: "Receive timely reminders before your food expires.",
-                step3Title: "AI Recipe Suggestions",
-                step3Desc: "Discover delicious recipes using your stored ingredients.",
-                simTitle: "Try It Out: Log Food Item",
-                simSub: "Select an ingredient and date to see how it works.",
-                inputPlaceholder: "Ingredient (e.g. Milk, Tofu)",
-                addBtn: "Add",
-                listHeader: "Stored Ingredients",
-                aiPrefix: "AI Recipe: ",
-                aiSuffix: " cooking ideas & storage tips",
-                dDayTag: "days left",
-                todayTag: "Expires today",
-                expiredTag: "Expired"
+                startNow: "Get Started Now",
+                learnMore: "Learn Features",
+                heroBadge: "Smart Food & Expiry Management",
+                heroTitle: "Perfect Fridge Life",
+                heroDesc: "From food item tracking to D-day expiry alerts and AI recipes with leftover ingredients!",
+                feature1Title: "Automated D-Day Alerts",
+                feature1Desc: "Smartly detects expiring food items and delivers timely reminders.",
+                feature2Title: "AI Recipe Suggestions",
+                feature2Desc: "Instantly offers delicious recipes combining ingredients in your fridge.",
+                feature3Title: "Grocery Savings Stats",
+                feature3Desc: "Dramatically reduce monthly grocery bills by preventing food waste.",
+                dashTitle: "My Smart Fridge Storage",
+                addItemBtn: "Add Food Item",
+                backHome: "Home",
+                statTotal: "Total Items",
+                statFresh: "Fresh",
+                statWarning: "Expiring Soon",
+                statExpired: "Expired",
+                filterAll: "Show All",
+                filterFridge: "❄️ Fridge",
+                filterFreezer: "🧊 Freezer",
+                filterPantry: "🏠 Pantry",
+                modalTitle: "Register New Food Item",
+                labelName: "Food Name",
+                labelCategory: "Storage Location",
+                labelExpiry: "Expiration Date",
+                btnCancel: "Cancel",
+                btnSave: "Save Item",
+                chatBtnLabel: "AI Recipe & Storage Chat"
             },
             ja: {
-                badge: "賞味期限のスマート記録管理",
-                title: "食材管理からAIレシピの提案まで",
-                subtitle: "賞味期限を入力するだけで、通知からレシピ提案までまとめて管理。",
-                step1Title: "賞味期限の入力",
-                step1Desc: "購入した食材と賞味期限を簡単に記録します。",
-                step2Title: "期限通知の受信",
-                step2Desc: "賞味期限が近づくと事前に通知でお知らせします。",
-                step3Title: "AIレシピ提案",
-                step3Desc: "保存中の食材で作れるおすすめ料理を提案します。",
-                simTitle: "体験する: 食材を登録してみる",
-                simSub: "食材名と日付を選択して追加してみてください。",
-                inputPlaceholder: "食材名 (例: 牛乳, 豆腐)",
-                addBtn: "登録",
-                listHeader: "保存中の食材リスト",
-                aiPrefix: "AIレシピ: ",
-                aiSuffix: " の活用レシピと保存のコツを表示",
-                dDayTag: "日残り",
-                todayTag: "本日まで",
-                expiredTag: "期限切れ"
+                startNow: "今すぐ始める",
+                learnMore: "機能を見る",
+                heroBadge: "スマートな賞味期限管理",
+                heroTitle: "完璧な冷蔵庫ライフ",
+                heroDesc: "食材の登録から賞味期限D-day通知、残り物を使ったAIレシピ提案まで！",
+                feature1Title: "D-Day自動通知",
+                feature1Desc: "賞味期限が近い食材を自動検知し、定期的に通知します。",
+                feature2Title: "AIおすすめレシピ",
+                feature2Desc: "冷蔵庫に残った食材を組み合わせて簡単レシピを提案します。",
+                feature3Title: "食費節約統計",
+                feature3Desc: "食品ロスを減らし、毎月の食費を大幅に節約できます。",
+                dashTitle: "マイ冷蔵庫保管庫",
+                addItemBtn: "食材を追加",
+                backHome: "ホームへ",
+                statTotal: "全食材",
+                statFresh: "新鮮",
+                statWarning: "期限間近",
+                statExpired: "期限切れ",
+                filterAll: "すべて",
+                filterFridge: "❄️ 冷蔵",
+                filterFreezer: "🧊 冷凍",
+                filterPantry: "🏠 常温",
+                modalTitle: "新規食材の登録",
+                labelName: "食材名",
+                labelCategory: "保管場所",
+                labelExpiry: "賞味期限",
+                btnCancel: "キャンセル",
+                btnSave: "保存する",
+                chatBtnLabel: "AI レ시피 Chat"
             },
             zh: {
-                badge: "智能食材保质期记录",
-                title: "从食材管理到AI食谱推荐",
-                subtitle: "只需记录一次保质期，即可自动获取过期提醒与AI食谱建议。",
-                step1Title: "输入保质期",
-                step1Desc: "轻松记录购买的食材及其保质期。",
-                step2Title: "获取临期提醒",
-                step2Desc: "保质期临近时，及时发送提醒。",
-                step3Title: "AI食谱推荐",
-                step3Desc: "根据现有食材生成推荐食谱。",
-                simTitle: "在线体验: 立即添加食材",
-                simSub: "手动选择食材和日期，体验智能管理。",
-                inputPlaceholder: "食材名称 (例: 牛奶, 豆腐)",
-                addBtn: "添加",
-                listHeader: "已存食材列表",
-                aiPrefix: "AI食谱: ",
-                aiSuffix: " 推荐烹饪方法与保存技巧",
-                dDayTag: "天剩余",
-                todayTag: "今天到期",
-                expiredTag: "已过期"
+                startNow: "立即开始使用",
+                learnMore: "了解更多功能",
+                heroBadge: "智能食材与保质期管理",
+                heroTitle: "完美的冰箱生活",
+                heroDesc: "从食材登记到保质期提醒，再到基于剩余食材的AI推荐食谱！",
+                feature1Title: "自动倒计时提醒",
+                feature1Desc: "智能检测临期食材，并定期发送提醒 notifications。",
+                feature2Title: "AI智能菜谱推荐",
+                feature2Desc: "组合冰箱中的剩余食材，快速生成美味菜谱。",
+                feature3Title: "伙食费开支统计",
+                feature3Desc: "减少食物浪费，显著降低每月超市与生鲜开销。",
+                dashTitle: "我的智能冰箱",
+                addItemBtn: "添加食材",
+                backHome: "返回首页",
+                statTotal: "食材总量",
+                statFresh: "新鲜",
+                statWarning: "临近过期",
+                statExpired: "已过期",
+                filterAll: "全部",
+                filterFridge: "❄️ 冷藏",
+                filterFreezer: "🧊 冷冻",
+                filterPantry: "🏠 常温",
+                modalTitle: "添加新食材",
+                labelName: "食材名称",
+                labelCategory: "保存位置",
+                labelExpiry: "保质期",
+                btnCancel: "取消",
+                btnSave: "保存",
+                chatBtnLabel: "AI菜谱 & 保鲜助手"
             },
             es: {
-                badge: "Control Inteligente de Caducidad",
-                title: "De la Gestión de Alimentos a Recetas con IA",
-                subtitle: "Registra fechas de caducidad y recibe alertas y sugerencias de recetas al instante.",
-                step1Title: "Ingresar Caducidad",
-                step1Desc: "Registra fácilmente tus alimentos y sus fechas.",
-                step2Title: "Alertas de Caducidad",
-                step2Desc: "Recibe avisos antes de que los alimentos caduquen.",
-                step3Title: "Recetas con IA",
-                step3Desc: "Descubre recetas con los ingredientes que tienes.",
-                simTitle: "Pruébalo: Agregar Alimento",
-                simSub: "Selecciona un ingrediente y una fecha para probarlo.",
-                inputPlaceholder: "Ingrediente (ej. Leche, Tofu)",
-                addBtn: "Agregar",
-                listHeader: "Alimentos Guardados",
-                aiPrefix: "Receta IA: ",
-                aiSuffix: " ideas de cocina y consejos de conservación",
-                dDayTag: "días restantes",
-                todayTag: "Vence hoy",
-                expiredTag: "Vencido"
+                startNow: "Empezar Ahora",
+                learnMore: "Ver Funciones",
+                heroBadge: "Gestión Inteligente de Comida",
+                heroTitle: "Vida de Nevera Perfecta",
+                heroDesc: "¡Desde el registro de alimentos hasta alertas de vencimiento y recetas IA!",
+                feature1Title: "Alertas Automáticas",
+                feature1Desc: "Detecta alimentos a punto de caducar y envía recordatorios.",
+                feature2Title: "Recetas con IA",
+                feature2Desc: "Genera deliciosas recetas con lo que te queda en el frigorífico.",
+                feature3Title: "Ahorro en Compras",
+                feature3Desc: "Reduce el desperdicio de comida y ahorra dinero cada mes.",
+                dashTitle: "Mi Nevera Inteligente",
+                addItemBtn: "Añadir Alimento",
+                backHome: "Inicio",
+                statTotal: "Total Items",
+                statFresh: "Fresco",
+                statWarning: "Por Caducar",
+                statExpired: "Caducado",
+                filterAll: "Todos",
+                filterFridge: "❄️ Nevera",
+                filterFreezer: "🧊 Congelador",
+                filterPantry: "🏠 Despensa",
+                modalTitle: "Registrar Alimento",
+                labelName: "Nombre del Alimento",
+                labelCategory: "Ubicación",
+                labelExpiry: "Fecha de Caducidad",
+                btnCancel: "Cancelar",
+                btnSave: "Guardar",
+                chatBtnLabel: "AI Chat Recetas"
             },
             fr: {
-                badge: "Suivi Intelligent de Péremption",
-                title: "De la Gestion des Aliments aux Recettes IA",
-                subtitle: "Gérez vos dates de péremption et recevez des alertes et idées de recettes.",
-                step1Title: "Enregistrer la Date",
-                step1Desc: "Enregistrez rapidement vos aliments et leurs dates.",
-                step2Title: "Rappels de Péremption",
-                step2Desc: "Recevez des alertes avant l'expiration de vos produits.",
-                step3Title: "Recettes IA",
-                step3Desc: "Découvrez des idées de repas avec vos ingrédients.",
-                simTitle: "Essayer: Ajouter un produit",
-                simSub: "Choisissez un produit et une date pour tester.",
-                inputPlaceholder: "Ingrédient (ex. Lait, Tofu)",
-                addBtn: "Ajouter",
-                listHeader: "Ingrédients en stock",
-                aiPrefix: "Recette IA: ",
-                aiSuffix: " idées de cuisine et conseils de conservation",
-                dDayTag: "jours restants",
-                todayTag: "Expire aujourd'hui",
-                expiredTag: "Expiré"
+                startNow: "Commencer Maintenant",
+                learnMore: "Découvrir",
+                heroBadge: "Gestion Intelligente des Aliments",
+                heroTitle: "Un Frigo Parfait",
+                heroDesc: "Du suivi des péremptions aux alertes D-day et suggestions de recettes IA !",
+                feature1Title: "Alertes Automatiques",
+                feature1Desc: "Détecte les produits bientôt périmés et vous avertit à temps.",
+                feature2Title: "Recettes IA",
+                feature2Desc: "Propose d'excellentes recettes avec les restes de votre frigo.",
+                feature3Title: "Économies Réelles",
+                feature3Desc: "Évitez le gaspillage et réduisez vos dépenses alimentaires.",
+                dashTitle: "Mon Frigo Intelligent",
+                addItemBtn: "Ajouter un Produit",
+                backHome: "Accueil",
+                statTotal: "Total Produits",
+                statFresh: "Frais",
+                statWarning: "Imminent",
+                statExpired: "Périmé",
+                filterAll: "Tous",
+                filterFridge: "❄️ Réfrigérateur",
+                filterFreezer: "🧊 Congélateur",
+                filterPantry: "🏠 Placard",
+                modalTitle: "Ajouter un produit",
+                labelName: "Nom de l'aliment",
+                labelCategory: "Emplacement",
+                labelExpiry: "Date limite",
+                btnCancel: "Annuler",
+                btnSave: "Enregistrer",
+                chatBtnLabel: "Assistant IA"
             },
             de: {
-                badge: "Smarte Haltbarkeitsverfolgung",
-                title: "Von Lebensmittelverwaltung zu KI-Rezepten",
-                subtitle: "Haltbarkeitsdatum eintragen und Erinnerungen sowie Rezepttipps erhalten.",
-                step1Title: "Datum Eintragen",
-                step1Desc: "Erfassen Sie Lebensmittel und Ablaufdaten einfach.",
-                step2Title: "Ablauf-Erinnerung",
-                step2Desc: "Erhalten Sie rechtzeitig Benachrichtigungen.",
-                step3Title: "KI-Rezeptvorschläge",
-                step3Desc: "Entdecken Sie Rezepte mit Ihren Zutaten.",
-                simTitle: "Ausprobieren: Produkt Hinzufügen",
-                simSub: "Wählen Sie eine Zutat und ein Datum aus.",
-                inputPlaceholder: "Zutat (z. B. Milch, Tofu)",
-                addBtn: "Hinzufügen",
-                listHeader: "Gespeicherte Zutaten",
-                aiPrefix: "KI-Rezept: ",
-                aiSuffix: " Kochideen & Lagerungstipps",
-                dDayTag: "Tage übrig",
-                todayTag: "Läuft heute ab",
-                expiredTag: "Abgelaufen"
+                startNow: "Jetzt Starten",
+                learnMore: "Funktionen",
+                heroBadge: "Smarte Lebensmittelverwaltung",
+                heroTitle: "Perfektes Kühlschrank-Leben",
+                heroDesc: "Von Haltbarkeits-Erinnerungen bis hin zu KI-Rezepten mit Resteverwertung!",
+                feature1Title: "Automatische Erinnerung",
+                feature1Desc: "Erkennt ablaufende Lebensmittel und benachrichtigt Sie rechtzeitig.",
+                feature2Title: "KI-Rezeptvorschläge",
+                feature2Desc: "Erstellt leckere Rezepte aus vorhandenen Zutaten.",
+                feature3Title: "Geld Sparen",
+                feature3Desc: "Reduzieren Sie Lebensmittelverschwendung und sparen Sie jeden Monat.",
+                dashTitle: "Mein Smarter Kühlschrank",
+                addItemBtn: "Lebensmittel Hinzufügen",
+                backHome: "Startseite",
+                statTotal: "Gesamt",
+                statFresh: "Frisch",
+                statWarning: "Bald ablaufend",
+                statExpired: "Abgelaufen",
+                filterAll: "Alle",
+                filterFridge: "❄️ Kühlschrank",
+                filterFreezer: "🧊 Gefrierschrank",
+                filterPantry: "🏠 Vorrat",
+                modalTitle: "Neues Lebensmittel eintragen",
+                labelName: "Name",
+                labelCategory: "Ort",
+                labelExpiry: "Mindesthaltbarkeit",
+                btnCancel: "Abbrechen",
+                btnSave: "Speichern",
+                chatBtnLabel: "KI Rezepte Chat"
             },
             vi: {
-                badge: "Quản Lý Hạn Sử Dụng Thông Minh",
-                title: "Từ Quản Lý Thực Phẩm Đến Gợi Ý Món Ăn AI",
-                subtitle: "Ghi lại hạn sử dụng đơn giản để nhận cảnh báo và công thức nấu ăn từ AI.",
-                step1Title: "Nhập Hạn Sử Dụng",
-                step1Desc: "Dễ dàng ghi lại thực phẩm và ngày hết hạn.",
-                step2Title: "Cảnh Báo Sắp Hết Hạn",
-                step2Desc: "Nhận thông báo trước khi thực phẩm hết hạn.",
-                step3Title: "Gợi Ý Món Ăn AI",
-                step3Desc: "Khám phá các món ăn từ thực phẩm bạn có.",
-                simTitle: "Thử Ngay: Thêm Thực Phẩm",
-                simSub: "Chọn thực phẩm và ngày để trải nghiệm ngay.",
-                inputPlaceholder: "Tên thực phẩm (VD: Sữa, Đậu phụ)",
-                addBtn: "Thêm",
-                listHeader: "Danh Sách Thực Phẩm",
-                aiPrefix: "Gợi ý AI: ",
-                aiSuffix: " công thức nấu ăn & mẹo bảo quản",
-                dDayTag: "ngày còn lại",
-                todayTag: "Hết hạn hôm nay",
-                expiredTag: "Đã hết hạn"
+                startNow: "Bắt đầu ngay",
+                learnMore: "Tìm hiểu thêm",
+                heroBadge: "Quản lý thực phẩm thông minh",
+                heroTitle: "Cuộc sống tủ lạnh hoàn hảo",
+                heroDesc: "Theo dõi hạn sử dụng, thông báo tự động và gợi ý món ăn bằng AI!",
+                feature1Title: "Cảnh báo tự động",
+                feature1Desc: "Phát hiện thực phẩm sắp hết hạn và nhắc nhở bạn kịp thời.",
+                feature2Title: "Gợi ý công thức AI",
+                feature2Desc: "Tạo công thức nấu ăn ngon từ nguyên liệu còn thừa trong tủ lạnh.",
+                feature3Title: "Tiết kiệm chi phí",
+                feature3Desc: "Giảm lãng phí thực phẩm và tiết kiệm chi tiêu hàng tháng.",
+                dashTitle: "Tủ lạnh thông minh của tôi",
+                addItemBtn: "Thêm thực phẩm",
+                backHome: "Trang chủ",
+                statTotal: "Tổng số",
+                statFresh: "Tươi ngon",
+                statWarning: "Sắp hết hạn",
+                statExpired: "Đã hết hạn",
+                filterAll: "Tất cả",
+                filterFridge: "❄️ Ngăn mát",
+                filterFreezer: "🧊 Ngăn đá",
+                filterPantry: "🏠 Nhiệt độ phòng",
+                modalTitle: "Đăng ký thực phẩm mới",
+                labelName: "Tên thực phẩm",
+                labelCategory: "Vị trí lưu trữ",
+                labelExpiry: "Hạn sử dụng",
+                btnCancel: "Hủy",
+                btnSave: "Lưu lại",
+                chatBtnLabel: "Trợ lý AI"
             },
-            ru: {
-                badge: "Умный учет сроков годности",
-                title: "От учета продуктов до ИИ-рецептов",
-                subtitle: "Записывайте сроки годности и получайте уведомления и рецепты от ИИ.",
-                step1Title: "Ввод срока",
-                step1Desc: "Легко записывайте продукты и их сроки годности.",
-                step2Title: "Уведомления",
-                step2Desc: "Получайте предупреждения до истечения срока.",
-                step3Title: "ИИ-Рецепты",
-                step3Desc: "Ищите рецепты из имеющихся продуктов.",
-                simTitle: "Попробовать: Добавить продукт",
-                simSub: "Выберите продукт и дату для проверки.",
-                inputPlaceholder: "Продукт (напр. Молоко, Тофу)",
-                addBtn: "Добавить",
-                listHeader: "Список продуктов",
-                aiPrefix: "ИИ-Рецепт: ",
-                aiSuffix: " идеи для готовки и советы по хранению",
-                dDayTag: "дн. осталось",
-                todayTag: "Истекает сегодня",
-                expiredTag: "Истек"
+            th: {
+                startNow: "เริ่มต้นใช้งานทันที",
+                learnMore: "เรียนรู้เพิ่มเติม",
+                heroBadge: "ระบบจัดการอาหารและวันหมดอายุ",
+                heroTitle: "ชีวิตตู้เย็นที่สมบูรณ์แบบ",
+                heroDesc: "บันทึกวัตถุดิบ แจ้งเตือนวันหมดอายุ และแนะนำสูตรอาหารด้วย AI!",
+                feature1Title: "แจ้งเตือนอัตโนมัติ",
+                feature1Desc: "ตรวจจับวัตถุดิบที่ใกล้หมดอายุและแจ้งเตือนคุณอย่างแม่นยำ",
+                feature2Title: "สูตรอาหารแนะนำโดย AI",
+                feature2Desc: "สร้างเมนูอร่อยจากวัตถุดิบที่เหลืออยู่ในตู้เย็นของคุณ",
+                feature3Title: "ประหยัดค่าใช้จ่าย",
+                feature3Desc: "ลดขยะอาหารและประหยัดค่าใช้จ่ายในแต่ละเดือนอย่างเห็นได้ชัด",
+                dashTitle: "ตู้เย็นอัจฉริยะของฉัน",
+                addItemBtn: "เพิ่มวัตถุดิบ",
+                backHome: "หน้าแรก",
+                statTotal: "ทั้งหมด",
+                statFresh: "สดใหม่",
+                statWarning: "ใกล้หมดอายุ",
+                statExpired: "หมดอายุแล้ว",
+                filterAll: "ทั้งหมด",
+                filterFridge: "❄️ ช่องแช่เย็น",
+                filterFreezer: "🧊 ช่องแช่แข็ง",
+                filterPantry: "🏠 อุณหภูมิห้อง",
+                modalTitle: "ลงทะเบียนวัตถุดิบใหม่",
+                labelName: "ชื่อวัตถุดิบ",
+                labelCategory: "สถานที่จัดเก็บ",
+                labelExpiry: "วันหมดอายุ",
+                btnCancel: "ยกเลิก",
+                btnSave: "บันทึก",
+                chatBtnLabel: "แชทบอท AI"
             },
-            pt: {
-                badge: "Controle Inteligente de Validade",
-                title: "Da Gestão de Alimentos a Receitas com IA",
-                subtitle: "Registre a validade e receba alertas e sugestões de receitas com IA.",
-                step1Title: "Inserir Validade",
-                step1Desc: "Registre facilmente seus alimentos e datas.",
-                step2Title: "Alertas de Validade",
-                step2Desc: "Receba avisos antes que os alimentos vençam.",
-                step3Title: "Receitas com IA",
-                step3Desc: "Descubra receitas com os ingredientes que possui.",
-                simTitle: "Experimente: Adicionar Alimento",
-                simSub: "Selecione um alimento e data para testar.",
-                inputPlaceholder: "Ingrediente (ex. Leite, Tofu)",
-                addBtn: "Adicionar",
-                listHeader: "Lista de Alimentos",
-                aiPrefix: "Receita IA: ",
-                aiSuffix: " ideias de culinária e dicas de conservação",
-                dDayTag: "dias restantes",
-                todayTag: "Vence hoje",
-                expiredTag: "Vencido"
+            id: {
+                startNow: "Mulai Sekarang",
+                learnMore: "Pelajari Fitur",
+                heroBadge: "Manajemen Makanan Cerdas",
+                heroTitle: "Kehidupan Kulkas Sempurna",
+                heroDesc: "Pelacakan tanggal kedaluwarsa, peringatan D-day, dan resep AI dari sisa bahan!",
+                feature1Title: "Peringatan Otomatis",
+                feature1Desc: "Mendeteksi makanan yang hampir kedaluwarsa dan memberi tahu Anda.",
+                feature2Title: "Rekomendasi Resep AI",
+                feature2Desc: "Menyarankan resep lezat berdasarkan bahan yang ada di kulkas.",
+                feature3Title: "Hemat Pengeluaran",
+                feature3Desc: "Mengurangi sampah makanan dan menghemat biaya belanja bulanan.",
+                dashTitle: "Kulkas Cerdas Saya",
+                addItemBtn: "Tambah Makanan",
+                backHome: "Beranda",
+                statTotal: "Total Item",
+                statFresh: "Segar",
+                statWarning: "Hampir Kedaluwarsa",
+                statExpired: "Kedaluwarsa",
+                filterAll: "Semua",
+                filterFridge: "❄️ Kulkas",
+                filterFreezer: "🧊 Pembeku",
+                filterPantry: "🏠 Suhu Ruang",
+                modalTitle: "Daftar Makanan Baru",
+                labelName: "Nama Makanan",
+                labelCategory: "Lokasi Penyimpanan",
+                labelExpiry: "Tanggal Kedaluwarsa",
+                btnCancel: "Batal",
+                btnSave: "Simpan",
+                chatBtnLabel: "Chat AI Resep"
             }
         };
 
         let currentLang = 'ko';
 
-        // --- 2. Initial Sample Items ---
+        // Sample Initial Food Items Data
         let foodItems = [
-            { id: 1, name: '우유 (Milk)', date: getFutureDate(3) },
-            { id: 2, name: '계란 (Eggs)', date: getFutureDate(7) }
+            { id: 1, name: "우유", category: "fridge", expiry: getOffsetDate(2) },
+            { id: 2, name: "계란 (10구)", category: "fridge", expiry: getOffsetDate(7) },
+            { id: 3, name: "닭가슴살", category: "freezer", expiry: getOffsetDate(30) },
+            { id: 4, name: "식빵", category: "pantry", expiry: getOffsetDate(-1) },
+            { id: 5, name: "사과", category: "fridge", expiry: getOffsetDate(4) }
         ];
 
-        function getFutureDate(daysToAdd) {
-            const date = new Date();
-            date.setDate(date.getDate() + daysToAdd);
-            return date.toISOString().split('T')[0];
+        function getOffsetDate(offsetDays) {
+            const d = new Date();
+            d.setDate(d.getDate() + offsetDays);
+            return d.toISOString().split('T')[0];
         }
 
-        // Initialize Default Date to Today in Date Input
-        document.getElementById('expiryDate').value = getFutureDate(5);
+        // Language Switcher Logic
+        function toggleLangDropdown() {
+            const dropdown = document.getElementById('langDropdown');
+            dropdown.classList.toggle('hidden');
+        }
 
-        // --- 3. Language & Theme Handlers ---
-        document.getElementById('langBtn').addEventListener('click', () => {
-            document.getElementById('langDropdown').classList.toggle('hidden');
-            document.getElementById('themeDropdown').classList.add('hidden');
-        });
-
-        document.getElementById('themeBtn').addEventListener('click', () => {
-            document.getElementById('themeDropdown').classList.toggle('hidden');
+        function changeLanguage(langCode, label) {
+            currentLang = langCode;
+            document.getElementById('currentLangLabel').innerText = label;
             document.getElementById('langDropdown').classList.add('hidden');
-        });
 
-        // Close Dropdowns on Click Outside
-        window.addEventListener('click', (e) => {
-            if (!e.target.closest('#langBtn') && !e.target.closest('#langDropdown')) {
-                document.getElementById('langDropdown').classList.add('hidden');
+            document.querySelectorAll('[data-i18n]').forEach(elem => {
+                const key = elem.getAttribute('data-i18n');
+                if (i18n[langCode] && i18n[langCode][key]) {
+                    elem.innerText = i18n[langCode][key];
+                }
+            });
+
+            renderDashboard();
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.closest('#langSelectBtn')) {
+                const dropdown = document.getElementById('langDropdown');
+                if (dropdown && !dropdown.classList.contains('hidden')) {
+                    dropdown.classList.add('hidden');
+                }
             }
-            if (!e.target.closest('#themeBtn') && !e.target.closest('#themeDropdown')) {
-                document.getElementById('themeDropdown').classList.add('hidden');
+        };
+
+        function triggerInteractiveDemo() {
+            const overlay = document.getElementById('loadingOverlay');
+            const percentText = document.getElementById('loadingPercent');
+            const bar = document.getElementById('loadingBar');
+            
+            overlay.classList.remove('hidden');
+            let progress = 0;
+
+            const interval = setInterval(() => {
+                progress += Math.floor(Math.random() * 8) + 4;
+                if (progress >= 100) {
+                    progress = 100;
+                    percentText.innerText = "100%";
+                    bar.style.width = "100%";
+                    clearInterval(interval);
+                    
+                    setTimeout(() => {
+                        overlay.classList.add('hidden');
+                        showPage('demo');
+                    }, 300);
+                } else {
+                    percentText.innerText = progress + "%";
+                    bar.style.width = progress + "%";
+                }
+            }, 70);
+        }
+
+        function showPage(page) {
+            if (page === 'demo') {
+                document.getElementById('homePage').classList.add('hidden');
+                document.getElementById('demoDashboardPage').classList.remove('hidden');
+                renderDashboard();
+            } else {
+                document.getElementById('homePage').classList.remove('hidden');
+                document.getElementById('demoDashboardPage').classList.add('hidden');
             }
-        });
-
-        function changeLanguage(lang) {
-            currentLang = lang;
-            const text = i18n[lang];
-
-            document.getElementById('badgeText').innerText = text.badge;
-            document.getElementById('heroTitle').innerText = text.title;
-            document.getElementById('heroSubtitle').innerText = text.subtitle;
-            document.getElementById('step1Title').innerText = text.step1Title;
-            document.getElementById('step1Desc').innerText = text.step1Desc;
-            document.getElementById('step2Title').innerText = text.step2Title;
-            document.getElementById('step2Desc').innerText = text.step2Desc;
-            document.getElementById('step3Title').innerText = text.step3Title;
-            document.getElementById('step3Desc').innerText = text.step3Desc;
-            document.getElementById('simTitle').innerHTML = `<i data-lucide="play-circle" class="w-5 h-5 theme-text"></i> ${text.simTitle}`;
-            document.getElementById('simSub').innerText = text.simSub;
-            document.getElementById('foodName').placeholder = text.inputPlaceholder;
-            document.getElementById('addBtnText').innerText = text.addBtn;
-            document.getElementById('listHeader').innerText = text.listHeader;
-
-            document.getElementById('langDropdown').classList.add('hidden');
-            renderFoodList();
-            lucide.createIcons();
         }
 
-        function setTheme(theme) {
-            const root = document.documentElement;
-            if (theme === 'emerald') {
-                root.style.setProperty('--theme-color', '#10b981');
-                root.style.setProperty('--theme-hover', '#059669');
-                root.style.setProperty('--theme-light', 'rgba(16, 185, 129, 0.15)');
-                root.style.setProperty('--theme-border', 'rgba(16, 185, 129, 0.3)');
-            } else if (theme === 'blue') {
-                root.style.setProperty('--theme-color', '#3b82f6');
-                root.style.setProperty('--theme-hover', '#2563eb');
-                root.style.setProperty('--theme-light', 'rgba(59, 130, 246, 0.15)');
-                root.style.setProperty('--theme-border', 'rgba(59, 130, 246, 0.3)');
-            } else if (theme === 'orange') {
-                root.style.setProperty('--theme-color', '#f97316');
-                root.style.setProperty('--theme-hover', '#ea580c');
-                root.style.setProperty('--theme-light', 'rgba(249, 115, 22, 0.15)');
-                root.style.setProperty('--theme-border', 'rgba(249, 115, 22, 0.3)');
-            } else if (theme === 'purple') {
-                root.style.setProperty('--theme-color', '#a855f7');
-                root.style.setProperty('--theme-hover', '#9333ea');
-                root.style.setProperty('--theme-light', 'rgba(168, 85, 247, 0.15)');
-                root.style.setProperty('--theme-border', 'rgba(168, 85, 247, 0.3)');
-            } else if (theme === 'pink') {
-                root.style.setProperty('--theme-color', '#ec4899');
-                root.style.setProperty('--theme-hover', '#db2777');
-                root.style.setProperty('--theme-light', 'rgba(236, 72, 153, 0.15)');
-                root.style.setProperty('--theme-border', 'rgba(236, 72, 153, 0.3)');
-            }
-            document.getElementById('themeDropdown').classList.add('hidden');
+        function scrollToFeatures() {
+            document.getElementById('features').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // --- 4. Interactive Simulator Logic ---
-        function handleAddFood(e) {
-            e.preventDefault();
-            const nameInput = document.getElementById('foodName');
-            const dateInput = document.getElementById('expiryDate');
+        let currentFilter = 'all';
 
-            if (!nameInput.value || !dateInput.value) return;
-
-            const newItem = {
-                id: Date.now(),
-                name: nameInput.value,
-                date: dateInput.value
-            };
-
-            foodItems.unshift(newItem);
-            nameInput.value = '';
-            renderFoodList();
+        function filterItems(category) {
+            currentFilter = category;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.getAttribute('data-category') === category) {
+                    btn.classList.add('bg-emerald-600', 'text-white');
+                    btn.classList.remove('bg-white', 'text-slate-700');
+                } else {
+                    btn.classList.remove('bg-emerald-600', 'text-white');
+                    btn.classList.add('bg-white', 'text-slate-700');
+                }
+            });
+            renderDashboard();
         }
 
-        function deleteFood(id) {
-            foodItems = foodItems.filter(item => item.id !== id);
-            renderFoodList();
-        }
+        function renderDashboard() {
+            const grid = document.getElementById('foodItemsGrid');
+            if (!grid) return;
 
-        function calculateDDay(targetDateStr) {
+            grid.innerHTML = '';
+
+            let freshCount = 0, warningCount = 0, expiredCount = 0;
+
             const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const target = new Date(targetDateStr);
-            target.setHours(0, 0, 0, 0);
-
-            const diffTime = target - today;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            return diffDays;
-        }
-
-        function renderFoodList() {
-            const container = document.getElementById('foodList');
-            const lang = i18n[currentLang];
-            container.innerHTML = '';
-
-            if (foodItems.length === 0) {
-                container.innerHTML = `<div class="text-center py-6 text-gray-500 text-sm">등록된 식재료가 없습니다.</div>`;
-                return;
-            }
+            today.setHours(0,0,0,0);
 
             foodItems.forEach(item => {
-                const diffDays = calculateDDay(item.date);
-                let badgeClass = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
-                let badgeText = `D-${diffDays} ${lang.dDayTag}`;
+                const expiryDate = new Date(item.expiry);
+                expiryDate.setHours(0,0,0,0);
+                const diffTime = expiryDate - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                let badgeColor = "bg-emerald-100 text-emerald-800 border-emerald-200";
+                let statusLabel = `D-${diffDays}`;
 
                 if (diffDays < 0) {
-                    badgeClass = 'bg-rose-500/10 text-rose-400 border-rose-500/20';
-                    badgeText = `${lang.expiredTag} (${Math.abs(diffDays)}d)`;
-                } else if (diffDays === 0) {
-                    badgeClass = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
-                    badgeText = lang.todayTag;
+                    badgeColor = "bg-rose-100 text-rose-800 border-rose-200";
+                    statusLabel = `만료 (D+${Math.abs(diffDays)})`;
+                    expiredCount++;
                 } else if (diffDays <= 3) {
-                    badgeClass = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+                    badgeColor = "bg-amber-100 text-amber-800 border-amber-200";
+                    statusLabel = `임박 (D-${diffDays})`;
+                    warningCount++;
+                } else {
+                    freshCount++;
                 }
 
-                const itemEl = document.createElement('div');
-                itemEl.className = 'bg-gray-950 border border-gray-800 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-gray-700 transition-all';
-                itemEl.innerHTML = `
-                    <div class="space-y-1">
-                        <div class="flex items-center gap-2.5">
-                            <span class="font-bold text-white text-base">${item.name}</span>
-                            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold border ${badgeClass}">
-                                ${badgeText}
-                            </span>
+                if (currentFilter !== 'all' && item.category !== currentFilter) {
+                    return;
+                }
+
+                let categoryIcon = item.category === 'fridge' ? '❄️ 냉장' : (item.category === 'freezer' ? '🧊 냉동' : '🏠 실온');
+
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex flex-col justify-between hover:shadow-md transition-all";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-2.5">
+                            <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-md">${categoryIcon}</span>
+                            <span class="text-xs font-bold px-2.5 py-0.5 rounded-md border ${badgeColor}">${statusLabel}</span>
                         </div>
-                        <div class="text-xs text-gray-400 flex items-center gap-1.5 pt-0.5">
-                            <i data-lucide="sparkles" class="w-3.5 h-3.5 theme-text"></i>
-                            <span>${lang.aiPrefix}<strong>${item.name}</strong>${lang.aiSuffix}</span>
-                        </div>
+                        <h4 class="text-lg font-extrabold text-slate-900 mb-1">${item.name}</h4>
+                        <p class="text-slate-500 font-medium text-xs">유통기한: <span class="font-bold text-slate-700">${item.expiry}</span></p>
                     </div>
-                    <div class="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 border-gray-900 pt-2 sm:pt-0">
-                        <span class="text-xs text-gray-500">${item.date}</span>
-                        <button onclick="deleteFood(${item.id})" class="text-gray-500 hover:text-rose-400 p-1 rounded-lg transition-colors">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <button onclick="askRecipeFor('${item.name}')" class="text-emerald-600 hover:text-emerald-700 font-bold text-xs flex items-center gap-1">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> AI 레시피
+                        </button>
+                        <button onclick="deleteItem(${item.id})" class="text-rose-500 hover:text-rose-700 font-semibold text-xs">
+                            <i class="fa-solid fa-trash-can"></i> 삭제
                         </button>
                     </div>
                 `;
-                container.appendChild(itemEl);
+                grid.appendChild(card);
             });
 
-            lucide.createIcons();
+            document.getElementById('statTotalCount').innerText = `${foodItems.length}개`;
+            document.getElementById('statFreshCount').innerText = `${freshCount}개`;
+            document.getElementById('statWarningCount').innerText = `${warningCount}개`;
+            document.getElementById('statExpiredCount').innerText = `${expiredCount}개`;
         }
 
-        // Initialize App
-        lucide.createIcons();
-        renderFoodList();
+        function deleteItem(id) {
+            foodItems = foodItems.filter(item => item.id !== id);
+            renderDashboard();
+        }
+
+        function openAddItemModal() {
+            document.getElementById('addModal').classList.remove('hidden');
+        }
+
+        function closeAddItemModal() {
+            document.getElementById('addModal').classList.add('hidden');
+        }
+
+        function handleAddFood(e) {
+            e.preventDefault();
+            const name = document.getElementById('foodName').value;
+            const category = document.getElementById('foodCategory').value;
+            const expiry = document.getElementById('foodExpiry').value;
+
+            if (name && expiry) {
+                foodItems.push({
+                    id: Date.now(),
+                    name,
+                    category,
+                    expiry
+                });
+                closeAddItemModal();
+                document.getElementById('addFoodForm').reset();
+                renderDashboard();
+            }
+        }
+
+        function toggleChatWindow() {
+            const chatBox = document.getElementById('chatBox');
+            chatBox.classList.toggle('hidden');
+        }
+
+        function sendQuickPrompt(promptText) {
+            document.getElementById('chatInput').value = promptText;
+            handleChatSubmit(new Event('submit'));
+        }
+
+        function askRecipeFor(itemName) {
+            if (document.getElementById('chatBox').classList.contains('hidden')) {
+                toggleChatWindow();
+            }
+            sendQuickPrompt(`${itemName} 활용할 수 있는 쉬운 요리 레시피 추천해줘`);
+        }
+
+        function handleChatSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addChatMessage(message, 'user');
+            input.value = '';
+
+            setTimeout(() => {
+                let aiReply = "구체적인 질문을 입력해 주시면 정확한 안내를 도와드릴게요!";
+                if (message.includes("레시피") || message.includes("요리")) {
+                    aiReply = "💡 **추천 요리:** 남은 재료를 볶아 만드는 '스피드 파스타' 또는 '계란 볶음밥'을 추천합니다! 소금, 후추 약간과 함께 약불에서 5분간 조리하면 훌륭한 한 끼가 됩니다.";
+                } else if (message.includes("유통기한") || message.includes("먹어도")) {
+                    aiReply = "⚠️ **유통기한 가이드:** 소비기한은 유통기한보다 보통 며칠 더 길지만, 변색이나 이상 악취가 나는 경우 즉시 폐기하시는 것이 안전합니다.";
+                } else if (message.includes("보관")) {
+                    aiReply = "🧊 **신선 보관 팁:** 밀폐 용기나 지퍼백에 공기를 최대한 빼고 보관하면 신선도를 오래 유지할 수 있습니다.";
+                } else {
+                    aiReply = `🤖 '${message}'에 대한 안내입니다. 푸드레코드 AI가 냉장고 안의 재료를 스마트하게 분석해드립니다!`;
+                }
+
+                addChatMessage(aiReply, 'ai');
+            }, 500);
+        }
+
+        function addChatMessage(text, sender) {
+            const container = document.getElementById('chatMessages');
+            const msgDiv = document.createElement('div');
+
+            if (sender === 'user') {
+                msgDiv.className = "flex justify-end";
+                msgDiv.innerHTML = `<div class="bg-emerald-600 text-white p-3 rounded-xl rounded-tr-none max-w-[85%] font-medium shadow-sm text-xs leading-relaxed">${text}</div>`;
+            } else {
+                msgDiv.className = "flex gap-2.5";
+                msgDiv.innerHTML = `
+                    <div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold flex-shrink-0">AI</div>
+                    <div class="bg-white p-3 rounded-xl rounded-tl-none border border-slate-200 text-slate-800 shadow-sm max-w-[85%] font-medium text-xs leading-relaxed">${text}</div>
+                `;
+            }
+
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        document.getElementById('foodExpiry').value = getOffsetDate(5);
     </script>
 </body>
 </html>
